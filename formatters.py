@@ -7,7 +7,10 @@ import csv
 from typing import List, Union, TextIO
 from io import StringIO
 
-from .models import VideoResult, ChannelResult, PlaylistResult
+try:
+    from .models import VideoResult, ChannelResult, PlaylistResult
+except ImportError:
+    from models import VideoResult, ChannelResult, PlaylistResult
 
 
 class OutputFormatter:
@@ -202,6 +205,70 @@ class YtdlpFormatter(OutputFormatter):
         return formatted
 
 
+class YtdlpTableFormatter(OutputFormatter):
+    """Format results as a table with 'yt-dlp' instead of URL column."""
+    
+    def __init__(self, audio_format: bool = False):
+        self.audio_format = audio_format
+    
+    def format(self, results: List[Union[VideoResult, ChannelResult, PlaylistResult]], output_file: TextIO = None) -> str:
+        if not results:
+            return "No results found."
+            
+        output = StringIO()
+        
+        for i, result in enumerate(results, 1):
+            if isinstance(result, VideoResult):
+                output.write(f"{i}. {result.title}\n")
+                output.write(f"   Channel: {result.channel_title}\n")
+                if result.duration:
+                    output.write(f"   Duration: {result.duration}\n")
+                if result.view_count:
+                    output.write(f"   Views: {self._format_count(result.view_count)}\n")
+                if self.audio_format:
+                    output.write(f"   yt-dlp -x --audio-format mp3 '{result.url}'\n")
+                else:
+                    output.write(f"   yt-dlp '{result.url}'\n")
+                
+            elif isinstance(result, ChannelResult):
+                output.write(f"{i}. {result.name}\n")
+                if result.description:
+                    output.write(f"   Description: {result.description[:100]}{'...' if len(result.description) > 100 else ''}\n")
+                if result.subscriber_count:
+                    output.write(f"   Subscribers: {self._format_count(result.subscriber_count)}\n")
+                output.write(f"   {result.url}\n")
+                
+            elif isinstance(result, PlaylistResult):
+                output.write(f"{i}. {result.title}\n")
+                output.write(f"   Channel: {result.channel_title}\n")
+                if result.video_count:
+                    output.write(f"   Videos: {result.video_count}\n")
+                if self.audio_format:
+                    output.write(f"   yt-dlp -x --audio-format mp3 '{result.url}'\n")
+                else:
+                    output.write(f"   yt-dlp '{result.url}'\n")
+                
+            if i < len(results):
+                output.write("\n")
+        
+        formatted = output.getvalue()
+        
+        if output_file:
+            output_file.write(formatted)
+            
+        return formatted
+    
+    def _format_count(self, count: int) -> str:
+        """Format large numbers with K/M/B suffixes."""
+        if count >= 1000000000:
+            return f"{count/1000000000:.1f}B"
+        elif count >= 1000000:
+            return f"{count/1000000:.1f}M"
+        elif count >= 1000:
+            return f"{count/1000:.1f}K"
+        return str(count)
+
+
 def get_formatter(format_name: str, **kwargs) -> OutputFormatter:
     """Get formatter by name."""
     formatters = {
@@ -210,8 +277,8 @@ def get_formatter(format_name: str, **kwargs) -> OutputFormatter:
         "csv": CSVFormatter,
         "simple": SimpleFormatter,
         "ytdlp": YtdlpFormatter,
-        "ytdlpa": lambda: YtdlpFormatter(audio_format=True),
-        "ytdlpv": lambda: YtdlpFormatter(audio_format=False)
+        "ytdlpa": lambda: YtdlpTableFormatter(audio_format=True),
+        "ytdlpv": lambda: YtdlpTableFormatter(audio_format=False)
     }
     
     if format_name not in formatters:

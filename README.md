@@ -4,12 +4,12 @@ A Python library for searching YouTube without using the YouTube API. Based on P
 
 ## Features
 
-- 🔍 Search videos, channels, and playlists without API keys
-- 📊 Multiple output formats (table, JSON, CSV, simple)
-- 🎵 yt-dlp integration for easy downloading
-- 🚀 Fast and reliable web scraping
-- 📱 Command line interface
-- 🐍 Python library for programmatic use
+- Search videos, channels, and playlists without API keys
+- Multiple output formats (table, JSON, CSV, simple)
+- yt-dlp integration for easy downloading
+- Fast and reliable web scraping
+- Command line interface
+- Python library for programmatic use
 
 ## Installation
 
