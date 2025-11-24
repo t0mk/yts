@@ -1,0 +1,42 @@
+# bytecode
+__pycache__/
+*.py[cod]
+
+# build artifacts
+build/
+dist/
+*.egg-info/
+*.egg
+
+# virtual environments
+.env/
+.venv/
+venv/
+
+# IDE
+.vscode/
+.idea/
+
+# test/coverage
+htmlcov/
+.coverage
+.coverage.*
+.cache/
+pytest_cache/
+
+# logs
+*.log
+
+# packaging helpers
+pip-wheel-metadata/
+*.whl
+
+# mypy / type checking
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# OS files
+.DS_Store
+Thumbs.db
+
